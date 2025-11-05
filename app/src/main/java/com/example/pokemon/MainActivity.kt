@@ -7,8 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -20,10 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import com.example.pokemon.ui.theme.PokemonTheme
+import com.example.pokemon.core.presentation.designsystem.PersonIcon
+import com.example.pokemon.core.presentation.designsystem.PokemonTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,10 +45,7 @@ fun PokemonApp() {
             AppDestinations.entries.forEach {
                 item(
                     icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
+                        it.icon()
                     },
                     label = { Text(it.label) },
                     selected = it == currentDestination,
@@ -70,11 +65,22 @@ fun PokemonApp() {
 
 enum class AppDestinations(
     val label: String,
-    val icon: ImageVector,
+    val icon: @Composable () -> Unit,
 ) {
-    HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite),
-    PROFILE("Profile", Icons.Default.AccountBox),
+    HOME(
+        "Home", {
+            Icon(
+                Icons.Default.Home,
+                contentDescription = "Home"
+            )
+        }
+    ),
+    PROFILE("Profile", {
+        Icon(
+            PersonIcon,
+            contentDescription = "Profile"
+        )
+    }),
 }
 
 @Composable
