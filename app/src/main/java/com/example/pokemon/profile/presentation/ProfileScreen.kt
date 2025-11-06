@@ -20,13 +20,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.pokemon.core.presentation.designsystem.*
 import com.example.pokemon.core.presentation.designsystem.component.OutlinedActionButton
+import com.example.pokemon.core.presentation.ui.ObserveAsEvents
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProfileScreen(
+fun ProfileScreenRoot(
     modifier: Modifier = Modifier,
-    onLogoutClick: () -> Unit = {}
+    onLogoutSuccess: () -> Unit,
+    viewModel: ProfileViewModel = koinViewModel()
 ) {
-    var emailVisible by remember { mutableStateOf(false) }
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            ProfileEvent.LogoutSuccess -> onLogoutSuccess()
+        }
+    }
+
+    ProfileScreen(
+        modifier,
+        state = viewModel.state,
+        onAction = viewModel::onAction
+    )
+}
+
+@Composable
+private fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    state: ProfileState,
+    onAction: (ProfileAction) -> Unit
+) {
     val scrollState = rememberScrollState()
 
     Box(
@@ -34,57 +55,64 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            ProfileHeader()
-
-            // Profile Content
+        if (state.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = PokemonGreen
+            )
+        } else {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
             ) {
-                // Title
-                Text(
-                    text = "Trainer Profile",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+                ProfileHeader()
 
-                // Name Field
-                ProfileInfoCard(
-                    icon = Icons.Default.Person,
-                    label = "Trainer Name",
-                    value = "Ash Ketchum",
-                    iconColor = PokemonGreen
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Email Field with visibility toggle
-                ProfileEmailCard(
-                    email = "ash.ketchum@pokemon.com",
-                    isVisible = emailVisible,
-                    onVisibilityToggle = { emailVisible = !emailVisible }
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Logout Button
-                OutlinedActionButton(
-                    text = "Logout",
-                    isLoading = false,
-                    modifier = Modifier.fillMaxWidth()
+                // Profile Content
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
-                    onLogoutClick()
-                }
+                    // Title
+                    Text(
+                        text = "Trainer Profile",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    // Name Field
+                    ProfileInfoCard(
+                        icon = Icons.Default.Person,
+                        label = "Trainer Name",
+                        value = state.name,
+                        iconColor = PokemonGreen
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Email Field with visibility toggle
+                    ProfileEmailCard(
+                        email = state.email,
+                        isVisible = state.isEmailVisible,
+                        onVisibilityToggle = { onAction(ProfileAction.OnToggleEmailVisibilityClick) }
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Logout Button
+                    OutlinedActionButton(
+                        text = "Logout",
+                        isLoading = state.isLoggingOut,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        onAction(ProfileAction.OnLogoutClick)
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }

@@ -21,7 +21,15 @@ fun NavigationRoot(
     ) {
         authGraph(navController)
         composable<Routes.Home> {
-            BottomNavigationScreen()
+            BottomNavigationScreen(
+                onLogout = {
+                    navController.navigate(Routes.Auth) {
+                        popUpTo(Routes.Home) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

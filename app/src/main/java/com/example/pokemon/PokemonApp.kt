@@ -4,6 +4,8 @@ import android.app.Application
 import com.example.pokemon.auth.data.di.authDataModule
 import com.example.pokemon.auth.presentation.di.authViewModelModule
 import com.example.pokemon.core.di.databaseModule
+import com.example.pokemon.profile.data.di.profileDataModule
+import com.example.pokemon.profile.presentation.di.profileViewModelModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
@@ -30,7 +32,9 @@ class PokemonApp : Application() {
                 appModule,
                 databaseModule,
                 authDataModule,
-                authViewModelModule
+                authViewModelModule,
+                profileDataModule,
+                profileViewModelModule
             )
         }
     }
