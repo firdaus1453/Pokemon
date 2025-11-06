@@ -38,6 +38,7 @@ import com.example.pokemon.auth.domain.UserDataValidator
 import com.example.pokemon.core.presentation.designsystem.CheckIcon
 import com.example.pokemon.core.presentation.designsystem.CrossIcon
 import com.example.pokemon.core.presentation.designsystem.EmailIcon
+import com.example.pokemon.core.presentation.designsystem.PersonIcon
 import com.example.pokemon.core.presentation.designsystem.PokemonDarkRed
 import com.example.pokemon.core.presentation.designsystem.PokemonGreen
 import com.example.pokemon.core.presentation.designsystem.PokemonTheme
@@ -156,6 +157,16 @@ private fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth(),
                 additionalInfo = stringResource(id = R.string.must_be_a_valid_email),
                 keyboardType = KeyboardType.Email
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                state = state.name,
+                startIcon = PersonIcon,
+                endIcon = null,
+                hint = stringResource(id = R.string.example_name),
+                title = stringResource(id = R.string.name),
+                modifier = Modifier.fillMaxWidth(),
+                keyboardType = KeyboardType.Text
             )
             Spacer(modifier = Modifier.height(16.dp))
             PasswordTextField(

@@ -19,14 +19,15 @@ class AuthRepositoryImpl(
         password: String
     ): EmptyResult<DataError.Network> {
         val exists = localUserDataSource.userExists(email)
-        if (!exists) {
+        val userId = localUserDataSource.getUserId(email)
+        if (!exists || userId == null) {
             return Result.Error(DataError.Network.UNAUTHORIZED)
         }
 
         val authInfo = AuthInfo(
-            accessToken = generateDummyToken(),
-            refreshToken = generateDummyToken(),
-            userId = email
+            accessToken = generateUUID(),
+            refreshToken = generateUUID(),
+            userId = userId
         )
         sessionStorage.set(authInfo)
 
@@ -35,18 +36,20 @@ class AuthRepositoryImpl(
 
     override suspend fun register(
         email: String,
-        password: String
+        password: String,
+        name: String
     ): EmptyResult<DataError.Network> {
         if (localUserDataSource.userExists(email)) {
             return Result.Error(DataError.Network.CONFLICT)
         }
 
-        val userId = email
+        val userId = generateUUID()
         val passwordHash = hashPassword(password)
 
         val insertResult = localUserDataSource.insertUser(
             id = userId,
             email = email,
+            name = name,
             passwordHash = passwordHash
         )
 
@@ -59,8 +62,8 @@ class AuthRepositoryImpl(
             }
             is Result.Success -> {
                 val authInfo = AuthInfo(
-                    accessToken = generateDummyToken(),
-                    refreshToken = generateDummyToken(),
+                    accessToken = generateUUID(),
+                    refreshToken = generateUUID(),
                     userId = userId
                 )
                 sessionStorage.set(authInfo)
@@ -73,7 +76,7 @@ class AuthRepositoryImpl(
         return password.reversed()
     }
 
-    private fun generateDummyToken(): String {
+    private fun generateUUID(): String {
         return UUID.randomUUID().toString()
     }
 }

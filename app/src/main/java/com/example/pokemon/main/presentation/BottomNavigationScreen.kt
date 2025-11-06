@@ -14,9 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.pokemon.core.presentation.designsystem.PersonIcon
-import com.example.pokemon.core.presentation.designsystem.PokemonTheme
+import com.example.pokemon.home.presentation.home.HomeScreen
+import com.example.pokemon.profile.presentation.ProfileScreen
 
 @Composable
 fun BottomNavigationScreen() {
@@ -37,8 +37,8 @@ fun BottomNavigationScreen() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             val padding = Modifier.padding(innerPadding)
             when (currentDestination) {
-                AppDestinations.HOME -> Greeting("Home", padding)
-                AppDestinations.PROFILE -> Greeting("Profile", padding)
+                AppDestinations.HOME -> HomeScreen(padding)
+                AppDestinations.PROFILE -> ProfileScreen(padding)
             }
         }
     }
@@ -59,19 +59,4 @@ enum class AppDestinations(
             PersonIcon, contentDescription = "Profile"
         )
     }),
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!", modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PokemonTheme {
-        Greeting("Android")
-    }
 }

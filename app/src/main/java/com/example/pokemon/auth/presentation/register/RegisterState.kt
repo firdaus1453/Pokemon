@@ -5,6 +5,7 @@ import com.example.pokemon.auth.domain.PasswordValidationState
 
 data class RegisterState(
     val email: TextFieldState = TextFieldState(),
+    val name: TextFieldState = TextFieldState(),
     val isEmailValid: Boolean = false,
     val password: TextFieldState = TextFieldState(),
     val isPasswordVisible: Boolean = false,

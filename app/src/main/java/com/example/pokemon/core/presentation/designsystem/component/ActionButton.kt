@@ -68,7 +68,7 @@ fun ActionButton(
 }
 
 @Composable
-fun PokemonOutlinedActionButton(
+fun OutlinedActionButton(
     text: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier,

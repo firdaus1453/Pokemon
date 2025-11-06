@@ -72,7 +72,8 @@ class RegisterViewModel(
             state = state.copy(isRegistering = true)
             val result = repository.register(
                 email = state.email.text.toString().trim(),
-                password = state.password.text.toString()
+                password = state.password.text.toString(),
+                name = state.name.text.toString().trim()
             )
             state = state.copy(isRegistering = false)
 

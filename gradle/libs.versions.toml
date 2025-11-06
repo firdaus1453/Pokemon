@@ -19,6 +19,7 @@ securityCryptoKtx = "1.1.0-alpha06"
 navigationCompose = "2.8.6"
 coreKtxVersion = "1.7.0"
 coreSplashscreen = "1.0.1"
+coilCompose = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +54,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 koin-test = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

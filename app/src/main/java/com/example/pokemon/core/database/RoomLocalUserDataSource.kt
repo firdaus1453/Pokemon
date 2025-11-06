@@ -15,15 +15,21 @@ class RoomLocalUserDataSource(
         return userDao.getUserByEmail(email) != null
     }
 
+    override suspend fun getUserId(email: String): String? {
+        return userDao.getUserByEmail(email)?.id
+    }
+
     override suspend fun insertUser(
         id: String,
         email: String,
+        name: String,
         passwordHash: String
     ): Result<Unit, DataError.Local> {
         return try {
             val entity = UserEntity(
                 id = id,
                 email = email,
+                name = name,
                 passwordHash = passwordHash
             )
             userDao.insertUser(entity)
