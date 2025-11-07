@@ -3,11 +3,13 @@ package com.example.pokemon.di
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.pokemon.core.data.networking.HttpClientFactory
 import com.example.pokemon.main.presentation.MainViewModel
 import com.example.pokemon.PokemonApp
 import kotlinx.coroutines.CoroutineScope
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val appModule = module {
@@ -23,6 +25,8 @@ val appModule = module {
     single<CoroutineScope> {
         (androidApplication() as PokemonApp).applicationScope
     }
+
+    singleOf(::HttpClientFactory)
 
     viewModelOf(::MainViewModel)
 }

@@ -22,6 +22,7 @@ val databaseModule = module {
     }
 
     single { get<AppDatabase>().userDao }
+    single { get<AppDatabase>().pokemonDao }
 
     singleOf(::RoomLocalUserDataSource).bind<LocalUserDataSource>()
     singleOf(::EncryptedSessionStorage).bind<SessionStorage>()

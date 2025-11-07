@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -34,9 +34,11 @@ fun RootHomeScreen(
 ) {
     HomeScreen(
         modifier = modifier,
+        state = viewModel.state,
         onAction = { action ->
             when(action) {
                 is HomeAction.OnItemClick -> onItemClick(action.pokemon)
+                else -> Unit
             }
             viewModel.onAction(action)
         }
@@ -46,10 +48,10 @@ fun RootHomeScreen(
 @Composable
 private fun HomeScreen(
     modifier: Modifier = Modifier,
-    onAction: (HomeAction) -> Unit
+    onAction: (HomeAction) -> Unit,
+    state: HomeState
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    val pokemonList = remember { getSamplePokemonList() }
 
     Column(
         modifier = modifier
@@ -77,18 +79,50 @@ private fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Pokemon Grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                items = pokemonList.filter {
+        if (state.isLoading && state.pokemonList.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val filteredList = state.pokemonList.filter {
                     it.name.contains(searchQuery, ignoreCase = true)
                 }
-            ) { pokemon ->
-                PokemonCard(pokemon = pokemon, onAction = onAction, modifier)
+
+                items(
+                    items = filteredList,
+                    key = { it.number }
+                ) { pokemon ->
+                    PokemonCard(pokemon = pokemon, onAction = onAction)
+                }
+
+                // Load more indicator
+                if (state.isLoadingMore) {
+                    item(span = { GridItemSpan(2) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+
+                // Load more trigger
+                if (!state.isLoadingMore && filteredList.isNotEmpty() && searchQuery.isEmpty()) {
+                    item(span = { GridItemSpan(2) }) {
+                        LaunchedEffect(Unit) {
+                            onAction(HomeAction.OnLoadMore)
+                        }
+                    }
+                }
             }
         }
     }
@@ -227,79 +261,4 @@ private fun TypeBadge(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )
     }
-}
-
-private fun getSamplePokemonList(): List<Pokemon> {
-    return listOf(
-        Pokemon(
-            number = 1,
-            name = "Bulbasaur",
-            types = listOf("Grass", "Poison"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
-            backgroundColor = Color(0xFF48D0B0)
-        ),
-        Pokemon(
-            number = 4,
-            name = "Charmander",
-            types = listOf("Fire"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
-            backgroundColor = Color(0xFFEE8130)
-        ),
-        Pokemon(
-            number = 7,
-            name = "Squirtle",
-            types = listOf("Water"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
-            backgroundColor = Color(0xFF6390F0)
-        ),
-        Pokemon(
-            number = 25,
-            name = "Pikachu",
-            types = listOf("Electric"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
-            backgroundColor = Color(0xFFF7D02C)
-        ),
-        Pokemon(
-            number = 39,
-            name = "Jigglypuff",
-            types = listOf("Normal", "Fairy"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png",
-            backgroundColor = Color(0xFFEE99AC)
-        ),
-        Pokemon(
-            number = 52,
-            name = "Meowth",
-            types = listOf("Normal"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/52.png",
-            backgroundColor = Color(0xFFA8A878)
-        ),
-        Pokemon(
-            number = 54,
-            name = "Psyduck",
-            types = listOf("Water"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png",
-            backgroundColor = Color(0xFF6390F0)
-        ),
-        Pokemon(
-            number = 133,
-            name = "Eevee",
-            types = listOf("Normal"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
-            backgroundColor = Color(0xFFA8A878)
-        ),
-        Pokemon(
-            number = 150,
-            name = "Mewtwo",
-            types = listOf("Psychic"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png",
-            backgroundColor = Color(0xFFF95587)
-        ),
-        Pokemon(
-            number = 143,
-            name = "Snorlax",
-            types = listOf("Normal"),
-            imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png",
-            backgroundColor = Color(0xFFA8A878)
-        )
-    )
 }
