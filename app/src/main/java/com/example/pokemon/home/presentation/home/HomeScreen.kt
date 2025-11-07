@@ -53,6 +53,16 @@ private fun HomeScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
+    // Trigger search with debounce
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotEmpty()) {
+            kotlinx.coroutines.delay(500)
+            onAction(HomeAction.OnSearch(searchQuery))
+        } else {
+            onAction(HomeAction.OnClearSearch)
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -79,47 +89,79 @@ private fun HomeScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Pokemon Grid
-        if (state.isLoading && state.pokemonList.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        when {
+            // Initial loading (no pokemon list yet)
+            state.isLoading && state.pokemonList.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
             }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val filteredList = state.pokemonList.filter {
-                    it.name.contains(searchQuery, ignoreCase = true)
+            // Searching
+            state.isSearching -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-
-                items(
-                    items = filteredList,
-                    key = { it.number }
-                ) { pokemon ->
-                    PokemonCard(pokemon = pokemon, onAction = onAction)
-                }
-
-                // Load more indicator
-                if (state.isLoadingMore) {
-                    item(span = { GridItemSpan(2) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+            // Search error
+            state.searchError != null && searchQuery.isNotEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = state.searchError,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        TextButton(onClick = { searchQuery = "" }) {
+                            Text("Clear Search")
                         }
                     }
                 }
+            }
+            else -> {
+                // Determine which list to show
+                val displayList = if (searchQuery.isNotEmpty()) {
+                    state.searchResults
+                } else {
+                    state.pokemonList
+                }
 
-                // Load more trigger
-                if (!state.isLoadingMore && filteredList.isNotEmpty() && searchQuery.isEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                        LaunchedEffect(Unit) {
-                            onAction(HomeAction.OnLoadMore)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(
+                        items = displayList,
+                        key = { it.number }
+                    ) { pokemon ->
+                        PokemonCard(pokemon = pokemon, onAction = onAction)
+                    }
+
+                    // Load more indicator (only when not searching)
+                    if (state.isLoadingMore && searchQuery.isEmpty()) {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
+
+                    // Load more trigger (only when not searching)
+                    if (!state.isLoadingMore && displayList.isNotEmpty() && searchQuery.isEmpty()) {
+                        item(span = { GridItemSpan(2) }) {
+                            LaunchedEffect(Unit) {
+                                onAction(HomeAction.OnLoadMore)
+                            }
                         }
                     }
                 }

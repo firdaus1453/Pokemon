@@ -37,6 +37,8 @@ class HomeViewModel(
             is HomeAction.OnItemClick -> Unit
             HomeAction.OnLoadMore -> loadMore()
             HomeAction.OnRefresh -> refresh()
+            is HomeAction.OnSearch -> search(action.query)
+            HomeAction.OnClearSearch -> clearSearch()
         }
     }
 
@@ -87,5 +89,48 @@ class HomeViewModel(
         currentOffset = 0
         state = state.copy(pokemonList = emptyList())
         loadPokemonList()
+    }
+
+    private fun search(query: String) {
+        if (query.isBlank()) {
+            clearSearch()
+            return
+        }
+
+        viewModelScope.launch {
+            state = state.copy(
+                isSearching = true,
+                searchQuery = query,
+                searchError = null
+            )
+
+            val result = pokemonRepository.searchPokemon(query.trim())
+
+            when (result) {
+                is Result.Success -> {
+                    state = state.copy(
+                        isSearching = false,
+                        searchResults = result.data,
+                        searchError = if (result.data.isEmpty()) "No Pokemon found" else null
+                    )
+                }
+                is Result.Error -> {
+                    state = state.copy(
+                        isSearching = false,
+                        searchResults = emptyList(),
+                        searchError = "Pokemon not found. Please check the name or try another search."
+                    )
+                }
+            }
+        }
+    }
+
+    private fun clearSearch() {
+        state = state.copy(
+            isSearching = false,
+            searchResults = emptyList(),
+            searchQuery = "",
+            searchError = null
+        )
     }
 }

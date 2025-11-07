@@ -8,4 +8,5 @@ interface PokemonRepository {
     fun getPokemonList(): Flow<List<Pokemon>>
     suspend fun fetchAndCachePokemon(limit: Int, offset: Int): Result<Unit, DataError.Network>
     suspend fun getPokemonDetail(id: Int): PokemonDetail?
+    suspend fun searchPokemon(query: String): Result<List<Pokemon>, DataError.Network>
 }
