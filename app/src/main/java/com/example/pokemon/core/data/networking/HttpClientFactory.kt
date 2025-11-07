@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 class HttpClientFactory {
 
-    private fun buildOkHttpClient(): OkHttpClient {
+    fun buildOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

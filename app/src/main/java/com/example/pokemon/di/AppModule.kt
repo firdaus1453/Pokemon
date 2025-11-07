@@ -28,5 +28,10 @@ val appModule = module {
 
     singleOf(::HttpClientFactory)
 
+    // Provide shared OkHttpClient
+    single {
+        get<HttpClientFactory>().buildOkHttpClient()
+    }
+
     viewModelOf(::MainViewModel)
 }

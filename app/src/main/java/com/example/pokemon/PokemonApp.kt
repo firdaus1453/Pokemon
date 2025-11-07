@@ -1,13 +1,17 @@
 package com.example.pokemon
 
 import android.app.Application
+import coil.Coil
+import coil.ImageLoader
 import com.example.pokemon.auth.data.di.authDataModule
 import com.example.pokemon.auth.presentation.di.authViewModelModule
 import com.example.pokemon.core.di.databaseModule
+import com.example.pokemon.core.di.imageModule
 import com.example.pokemon.profile.data.di.profileDataModule
 import com.example.pokemon.profile.presentation.di.profileViewModelModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -19,6 +23,7 @@ import com.example.pokemon.home.presentation.di.homeViewModelModule
 class PokemonApp : Application() {
 
     val applicationScope = CoroutineScope(SupervisorJob())
+    private val imageLoader: ImageLoader by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -33,6 +38,7 @@ class PokemonApp : Application() {
             modules(
                 appModule,
                 databaseModule,
+                imageModule,
                 authDataModule,
                 authViewModelModule,
                 profileDataModule,
@@ -41,5 +47,7 @@ class PokemonApp : Application() {
                 homeViewModelModule
             )
         }
+
+        Coil.setImageLoader(imageLoader)
     }
 }
