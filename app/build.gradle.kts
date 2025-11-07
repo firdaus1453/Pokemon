@@ -21,7 +21,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    //https://pokeapi.co/api/v2/pokemon?limit=100&offset=0
     buildTypes {
         debug {
             buildConfigField("String", "BASE_URL", "\"https://pokeapi.co/api/v2/\"")
