@@ -18,10 +18,6 @@ sealed interface Routes {
 
     @Serializable
     data class DetailHome(
-        val pokemonNumber: Int,
-        val pokemonName: String,
-        val pokemonTypes: String, // comma-separated types
-        val pokemonImageUrl: String,
-        val backgroundColor: Long // Color as Long (ARGB)
+        val pokemonId: Int
     ) : Routes
 }

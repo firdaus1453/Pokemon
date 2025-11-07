@@ -1,7 +1,6 @@
 package com.example.pokemon.core.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -79,14 +78,10 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
                     }
                 }
             },
-            onNavigateToDetail = { pokemon ->
+            onNavigateToDetail = { pokemonId ->
                 navController.navigate(
                     Routes.DetailHome(
-                        pokemonNumber = pokemon.number,
-                        pokemonName = pokemon.name,
-                        pokemonTypes = pokemon.types.joinToString(","),
-                        pokemonImageUrl = pokemon.imageUrl,
-                        backgroundColor = pokemon.backgroundColor.value.toLong()
+                        pokemonId = pokemonId
                     )
                 )
             }
@@ -96,11 +91,7 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
     composable<Routes.DetailHome> {
         val args = it.toRoute<Routes.DetailHome>()
         HomeDetailScreenRoot(
-            pokemonNumber = args.pokemonNumber,
-            pokemonName = args.pokemonName,
-            pokemonTypes = args.pokemonTypes.split(","),
-            pokemonImageUrl = args.pokemonImageUrl,
-            backgroundColor = Color(args.backgroundColor.toULong()),
+            pokemonId = args.pokemonId,
             onBackClick = {
                 navController.navigateUp()
             }

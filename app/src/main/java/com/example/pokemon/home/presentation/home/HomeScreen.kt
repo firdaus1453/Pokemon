@@ -29,7 +29,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun RootHomeScreen(
     modifier: Modifier = Modifier,
-    onItemClick: (Pokemon) -> Unit,
+    onItemClick: (Int) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     HomeScreen(
@@ -37,7 +37,7 @@ fun RootHomeScreen(
         state = viewModel.state,
         onAction = { action ->
             when(action) {
-                is HomeAction.OnItemClick -> onItemClick(action.pokemon)
+                is HomeAction.OnItemClick -> onItemClick(action.idPokemon)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -182,7 +182,7 @@ private fun PokemonCard(
         modifier = modifier
             .fillMaxWidth()
             .height(140.dp)
-            .clickable { onAction(HomeAction.OnItemClick(pokemon)) },
+            .clickable { onAction(HomeAction.OnItemClick(pokemon.number)) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = pokemon.backgroundColor

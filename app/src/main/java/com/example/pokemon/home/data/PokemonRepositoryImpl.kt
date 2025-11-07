@@ -4,10 +4,12 @@ import com.example.pokemon.core.data.networking.safeCall
 import com.example.pokemon.core.database.dao.PokemonDao
 import com.example.pokemon.core.domain.util.DataError
 import com.example.pokemon.core.domain.util.Result
+import com.example.pokemon.home.data.mappers.toDetailDomain
 import com.example.pokemon.home.data.mappers.toDomain
 import com.example.pokemon.home.data.mappers.toEntity
 import com.example.pokemon.home.data.network.PokemonApiService
 import com.example.pokemon.home.domain.Pokemon
+import com.example.pokemon.home.domain.PokemonDetail
 import com.example.pokemon.home.domain.PokemonRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -61,7 +63,7 @@ class PokemonRepositoryImpl(
         return Result.Success(Unit)
     }
 
-    override suspend fun getPokemonDetail(id: Int): Pokemon? {
-        return pokemonDao.getPokemonById(id)?.toDomain()
+    override suspend fun getPokemonDetail(id: Int): PokemonDetail? {
+        return pokemonDao.getPokemonById(id)?.toDetailDomain()
     }
 }

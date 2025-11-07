@@ -23,139 +23,146 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.pokemon.core.presentation.designsystem.*
+import com.example.pokemon.core.presentation.ui.ObserveAsEvents
+import com.example.pokemon.home.domain.PokemonDetail
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun HomeDetailScreenRoot(
-    pokemonNumber: Int,
-    pokemonName: String,
-    pokemonTypes: List<String>,
-    pokemonImageUrl: String,
-    backgroundColor: Color,
-    onBackClick: () -> Unit = {}
+    pokemonId: Int,
+    onBackClick: () -> Unit = {},
+    viewModel: HomeDetailViewModel = koinViewModel { parametersOf(pokemonId) }
 ) {
+    val state = viewModel.state
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when(event) {
+            HomeDetailEvent.NavigateBack -> onBackClick()
+        }
+    }
+
     HomeDetailScreen(
-        pokemonNumber = pokemonNumber,
-        pokemonName = pokemonName,
-        pokemonTypes = pokemonTypes,
-        pokemonImageUrl = pokemonImageUrl,
-        backgroundColor = backgroundColor,
-        onBackClick = onBackClick
+        state = state,
+        onAction = { action ->
+            when(action) {
+                HomeDetailAction.OnBackClick -> onBackClick()
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
 @Composable
 private fun HomeDetailScreen(
     modifier: Modifier = Modifier,
-    pokemonNumber: Int,
-    pokemonName: String,
-    pokemonTypes: List<String>,
-    pokemonImageUrl: String,
-    backgroundColor: Color,
-    onBackClick: () -> Unit = {}
+    state: HomeDetailState,
+    onAction: (HomeDetailAction) -> Unit
 ) {
-    // Sample stats - in real app, these would come from data layer
-    val stats = remember {
-        PokemonStats(
-            hp = 45,
-            attack = 49,
-            defense = 49,
-            specialAttack = 65,
-            specialDefense = 65,
-            speed = 45
-        )
-    }
-
-    val info = remember {
-        PokemonInfo(
-            height = "0.7 m (2'04\")",
-            weight = "6.9 kg (15.2 lbs)",
-            abilities = listOf("Overgrow", "Chlorophyll"),
-            category = "Seed Pokémon",
-            description = "There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger."
-        )
-    }
-
     val scrollState = rememberScrollState()
-    var showContent by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        showContent = true
-    }
-
-    val contentAlpha by animateFloatAsState(
-        targetValue = if (showContent) 1f else 0f,
-        animationSpec = tween(300),
-        label = "content_alpha"
-    )
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            // Header Section with Pokemon Image
-            PokemonDetailHeader(
-                pokemonNumber = pokemonNumber,
-                pokemonName = pokemonName,
-                pokemonTypes = pokemonTypes,
-                pokemonImageUrl = pokemonImageUrl,
-                backgroundColor = backgroundColor,
-                onBackClick = onBackClick
-            )
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            }
+            state.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = state.error,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(onClick = { onAction(HomeDetailAction.OnBackClick) }) {
+                            Text("Go Back")
+                        }
+                    }
+                }
+            }
+            state.pokemon != null -> {
+                val pokemon = state.pokemon
 
-            // Content Section
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Pokemon Info Section
-                PokemonInfoSection(
-                    info = info,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                ) {
+                    // Header Section with Pokemon Image
+                    PokemonDetailHeader(
+                        pokemonNumber = pokemon.number,
+                        pokemonName = pokemon.name,
+                        pokemonTypes = pokemon.types,
+                        pokemonImageUrl = pokemon.imageUrl,
+                        backgroundColor = pokemon.backgroundColor,
+                        onBackClick = { onAction(HomeDetailAction.OnBackClick) }
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    // Content Section
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        // Pokemon Info Section
+                        PokemonInfoSection(
+                            pokemon = pokemon,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                // Stats Section
-                Text(
-                    text = "Base Stats",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                        // Stats Section
+                        Text(
+                            text = "Base Stats",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
 
-                PokemonStatsSection(
-                    stats = stats,
-                    accentColor = backgroundColor,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(24.dp))
+                        PokemonStatsSection(
+                            pokemon = pokemon,
+                            accentColor = pokemon.backgroundColor,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                // Evolution Section (Placeholder)
-                Text(
-                    text = "Evolution",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                        // Evolution Section (Placeholder)
+                        Text(
+                            text = "Evolution",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
 
-                EvolutionSection(
-                    pokemonName = pokemonName,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(32.dp))
+                        EvolutionSection(
+                            pokemonName = pokemon.name,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                }
             }
         }
     }
@@ -276,9 +283,18 @@ private fun TypeBadgeLarge(
 
 @Composable
 private fun PokemonInfoSection(
-    info: PokemonInfo,
+    pokemon: PokemonDetail,
     modifier: Modifier = Modifier
 ) {
+    val heightInMeters = pokemon.height / 10.0
+    val heightInFeet = (heightInMeters * 3.28084).toInt() / 12
+    val heightInInches = ((heightInMeters * 3.28084) % 12).toInt()
+    val weightInKg = pokemon.weight / 10.0
+    val weightInLbs = (weightInKg * 2.20462).toInt()
+
+    val description = "This ${pokemon.name} has various abilities and types that make it unique. " +
+            "Explore its stats to learn more about this Pokemon!"
+
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -305,7 +321,7 @@ private fun PokemonInfoSection(
 
             // Description
             Text(
-                text = info.description,
+                text = description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp
@@ -320,13 +336,13 @@ private fun PokemonInfoSection(
             ) {
                 InfoItem(
                     label = "Height",
-                    value = info.height,
+                    value = "${"%.1f".format(heightInMeters)} m ($heightInFeet'${heightInInches.toString().padStart(2, '0')}\")",
                     modifier = Modifier.weight(1f)
                 )
 
                 InfoItem(
                     label = "Weight",
-                    value = info.weight,
+                    value = "${"%.1f".format(weightInKg)} kg ($weightInLbs lbs)",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -340,34 +356,36 @@ private fun PokemonInfoSection(
             // Category
             InfoRow(
                 label = "Category",
-                value = info.category
+                value = pokemon.category
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Abilities
-            Column {
-                Text(
-                    text = "Abilities",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    info.abilities.forEach { ability ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = PokemonGreen.copy(alpha = 0.15f)
-                        ) {
-                            Text(
-                                text = ability,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = PokemonGreen,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
+            if (pokemon.abilities.isNotEmpty()) {
+                Column {
+                    Text(
+                        text = "Abilities",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        pokemon.abilities.forEach { ability ->
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = PokemonGreen.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = ability.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = PokemonGreen,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -427,52 +445,55 @@ private fun InfoRow(
 
 @Composable
 private fun PokemonStatsSection(
-    stats: PokemonStats,
+    pokemon: PokemonDetail,
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val total = pokemon.hp + pokemon.attack + pokemon.defense +
+                pokemon.specialAttack + pokemon.specialDefense + pokemon.speed
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatBar(
             label = "HP",
-            value = stats.hp,
+            value = pokemon.hp,
             maxValue = 255,
             color = accentColor
         )
 
         StatBar(
             label = "Attack",
-            value = stats.attack,
+            value = pokemon.attack,
             maxValue = 255,
             color = accentColor
         )
 
         StatBar(
             label = "Defense",
-            value = stats.defense,
+            value = pokemon.defense,
             maxValue = 255,
             color = accentColor
         )
 
         StatBar(
             label = "Sp. Atk",
-            value = stats.specialAttack,
+            value = pokemon.specialAttack,
             maxValue = 255,
             color = accentColor
         )
 
         StatBar(
             label = "Sp. Def",
-            value = stats.specialDefense,
+            value = pokemon.specialDefense,
             maxValue = 255,
             color = accentColor
         )
 
         StatBar(
             label = "Speed",
-            value = stats.speed,
+            value = pokemon.speed,
             maxValue = 255,
             color = accentColor
         )
@@ -502,7 +523,7 @@ private fun PokemonStatsSection(
                 )
 
                 Text(
-                    text = stats.total().toString(),
+                    text = total.toString(),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = accentColor
@@ -655,23 +676,3 @@ private fun EvolutionStage(
         )
     }
 }
-
-// Data classes
-data class PokemonStats(
-    val hp: Int,
-    val attack: Int,
-    val defense: Int,
-    val specialAttack: Int,
-    val specialDefense: Int,
-    val speed: Int
-) {
-    fun total() = hp + attack + defense + specialAttack + specialDefense + speed
-}
-
-data class PokemonInfo(
-    val height: String,
-    val weight: String,
-    val abilities: List<String>,
-    val category: String,
-    val description: String
-)

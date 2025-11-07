@@ -22,7 +22,7 @@ import com.example.pokemon.profile.presentation.ProfileScreenRoot
 @Composable
 fun BottomNavigationScreen(
     onLogout: () -> Unit = {},
-    onNavigateToDetail: (Pokemon) -> Unit = {}
+    onNavigateToDetail: (Int) -> Unit = {}
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 

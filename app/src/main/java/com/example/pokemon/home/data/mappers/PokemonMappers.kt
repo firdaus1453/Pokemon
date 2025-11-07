@@ -3,6 +3,7 @@ package com.example.pokemon.home.data.mappers
 import androidx.compose.ui.graphics.Color
 import com.example.pokemon.core.database.entity.PokemonEntity
 import com.example.pokemon.home.domain.Pokemon
+import com.example.pokemon.home.domain.PokemonDetail
 import com.example.pokemon.home.domain.PokemonDetailDto
 
 fun PokemonDetailDto.toEntity(): PokemonEntity {
@@ -41,6 +42,26 @@ fun PokemonEntity.toDomain(): Pokemon {
         types = types.split(","),
         imageUrl = imageUrl,
         backgroundColor = getTypeColor(types.split(",").firstOrNull() ?: "normal")
+    )
+}
+
+fun PokemonEntity.toDetailDomain(): PokemonDetail {
+    return PokemonDetail(
+        number = id,
+        name = name,
+        types = types.split(","),
+        imageUrl = imageUrl,
+        backgroundColor = getTypeColor(types.split(",").firstOrNull() ?: "normal"),
+        height = height,
+        weight = weight,
+        hp = hp,
+        attack = attack,
+        defense = defense,
+        specialAttack = specialAttack,
+        specialDefense = specialDefense,
+        speed = speed,
+        abilities = abilities.split(",").filter { it.isNotBlank() },
+        category = category
     )
 }
 
