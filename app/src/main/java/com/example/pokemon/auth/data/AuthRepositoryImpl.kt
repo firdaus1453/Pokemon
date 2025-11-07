@@ -19,7 +19,7 @@ class AuthRepositoryImpl(
         password: String
     ): EmptyResult<DataError.Network> {
         val exists = localUserDataSource.userExists(email)
-        val userId = localUserDataSource.getUserId(email)
+        val userId = localUserDataSource.getUserId(email, password)
         if (!exists || userId == null) {
             return Result.Error(DataError.Network.UNAUTHORIZED)
         }

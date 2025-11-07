@@ -23,10 +23,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.pokemon.home.domain.Pokemon
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(
-    modifier: Modifier = Modifier
+fun RootHomeScreen(
+    modifier: Modifier = Modifier,
+    onItemClick: (Pokemon) -> Unit,
+    viewModel: HomeViewModel = koinViewModel(),
+) {
+    HomeScreen(
+        modifier = modifier,
+        onAction = { action ->
+            when(action) {
+                is HomeAction.OnItemClick -> onItemClick(action.pokemon)
+            }
+            viewModel.onAction(action)
+        }
+    )
+}
+
+@Composable
+private fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onAction: (HomeAction) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val pokemonList = remember { getSamplePokemonList() }
@@ -68,7 +88,7 @@ fun HomeScreen(
                     it.name.contains(searchQuery, ignoreCase = true)
                 }
             ) { pokemon ->
-                PokemonCard(pokemon = pokemon)
+                PokemonCard(pokemon = pokemon, onAction = onAction, modifier)
             }
         }
     }
@@ -121,13 +141,14 @@ private fun SearchBar(
 @Composable
 private fun PokemonCard(
     pokemon: Pokemon,
+    onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(140.dp)
-            .clickable { /* Navigate to detail */ },
+            .clickable { onAction(HomeAction.OnItemClick(pokemon)) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = pokemon.backgroundColor
@@ -207,14 +228,6 @@ private fun TypeBadge(
         )
     }
 }
-
-data class Pokemon(
-    val number: Int,
-    val name: String,
-    val types: List<String>,
-    val imageUrl: String,
-    val backgroundColor: Color
-)
 
 private fun getSamplePokemonList(): List<Pokemon> {
     return listOf(

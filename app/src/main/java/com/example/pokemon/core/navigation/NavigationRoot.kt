@@ -1,13 +1,16 @@
 package com.example.pokemon.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import com.example.pokemon.auth.presentation.login.LoginScreenRoot
 import com.example.pokemon.auth.presentation.register.RegisterScreenRoot
+import com.example.pokemon.home.presentation.home_detail.HomeDetailScreenRoot
 import com.example.pokemon.main.presentation.BottomNavigationScreen
 
 @Composable
@@ -20,17 +23,7 @@ fun NavigationRoot(
         startDestination = if (isLoggedIn) Routes.Home else Routes.Auth
     ) {
         authGraph(navController)
-        composable<Routes.Home> {
-            BottomNavigationScreen(
-                onLogout = {
-                    navController.navigate(Routes.Auth) {
-                        popUpTo(Routes.Home) {
-                            inclusive = true
-                        }
-                    }
-                }
-            )
-        }
+        homeGraph(navController)
     }
 }
 
@@ -73,5 +66,44 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
                 }
             )
         }
+    }
+}
+
+private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
+    composable<Routes.Home> {
+        BottomNavigationScreen(
+            onLogout = {
+                navController.navigate(Routes.Auth) {
+                    popUpTo(Routes.Home) {
+                        inclusive = true
+                    }
+                }
+            },
+            onNavigateToDetail = { pokemon ->
+                navController.navigate(
+                    Routes.DetailHome(
+                        pokemonNumber = pokemon.number,
+                        pokemonName = pokemon.name,
+                        pokemonTypes = pokemon.types.joinToString(","),
+                        pokemonImageUrl = pokemon.imageUrl,
+                        backgroundColor = pokemon.backgroundColor.value.toLong()
+                    )
+                )
+            }
+        )
+    }
+
+    composable<Routes.DetailHome> {
+        val args = it.toRoute<Routes.DetailHome>()
+        HomeDetailScreenRoot(
+            pokemonNumber = args.pokemonNumber,
+            pokemonName = args.pokemonName,
+            pokemonTypes = args.pokemonTypes.split(","),
+            pokemonImageUrl = args.pokemonImageUrl,
+            backgroundColor = Color(args.backgroundColor.toULong()),
+            onBackClick = {
+                navController.navigateUp()
+            }
+        )
     }
 }

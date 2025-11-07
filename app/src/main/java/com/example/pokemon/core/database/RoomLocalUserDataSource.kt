@@ -15,8 +15,8 @@ class RoomLocalUserDataSource(
         return userDao.getUserByEmail(email) != null
     }
 
-    override suspend fun getUserId(email: String): String? {
-        return userDao.getUserByEmail(email)?.id
+    override suspend fun getUserId(email: String, password: String): String? {
+        return if (userDao.getUserByEmail(email)?.passwordHash != password.reversed()) null else userDao.getUserByEmail(email)?.id
     }
 
     override suspend fun insertUser(

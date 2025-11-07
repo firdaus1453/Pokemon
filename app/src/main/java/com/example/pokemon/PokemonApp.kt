@@ -13,6 +13,7 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import timber.log.Timber
 import com.example.pokemon.di.appModule
+import com.example.pokemon.home.presentation.di.homeViewModelModule
 
 class PokemonApp : Application() {
 
@@ -34,7 +35,8 @@ class PokemonApp : Application() {
                 authDataModule,
                 authViewModelModule,
                 profileDataModule,
-                profileViewModelModule
+                profileViewModelModule,
+                homeViewModelModule
             )
         }
     }

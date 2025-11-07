@@ -15,12 +15,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.pokemon.core.presentation.designsystem.PersonIcon
-import com.example.pokemon.home.presentation.home.HomeScreen
+import com.example.pokemon.home.domain.Pokemon
+import com.example.pokemon.home.presentation.home.RootHomeScreen
 import com.example.pokemon.profile.presentation.ProfileScreenRoot
 
 @Composable
 fun BottomNavigationScreen(
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToDetail: (Pokemon) -> Unit = {}
 ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
@@ -39,9 +41,12 @@ fun BottomNavigationScreen(
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             val padding = Modifier.padding(innerPadding)
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(padding)
+                AppDestinations.HOME -> RootHomeScreen(
+                    modifier = padding,
+                    onItemClick = onNavigateToDetail
+                )
                 AppDestinations.PROFILE -> ProfileScreenRoot(
-                    padding,
+                    modifier = padding,
                     onLogoutSuccess = onLogout
                 )
             }
