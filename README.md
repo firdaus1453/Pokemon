@@ -3,10 +3,9 @@
 A modern Android application built with Clean Architecture principles, showcasing best practices in Android development. This app allows users to browse, search, and view detailed information about Pokemon.
 
 ## Screenshot
-<img width="1080" height="1920" alt="Profile" src="https://github.com/user-attachments/assets/4334d95e-6497-45f8-90f5-6f4311c758d1" hspace="20" style="width:28%; height:auto;"/>
 <img width="1080" height="1920" alt="Home" src="https://github.com/user-attachments/assets/568f3028-974d-4299-ae8b-ecaac9b26afa" hspace="20" style="width:28%; height:auto;"/>
 <img width="1080" height="1920" alt="Detail" src="https://github.com/user-attachments/assets/d43d4f86-f76b-4cda-853f-d22f2f84ed71" hspace="20" style="width:28%; height:auto;"/>
-
+<img width="1080" height="1920" alt="Profile" src="https://github.com/user-attachments/assets/4334d95e-6497-45f8-90f5-6f4311c758d1" hspace="20" style="width:28%; height:auto;"/>
 
 ## Features
 
@@ -14,8 +13,16 @@ A modern Android application built with Clean Architecture principles, showcasin
 - 🔍 Smart search (local-first with API fallback)
 - 📊 Detailed Pokemon information (stats, abilities, types)
 - 💾 Offline-first architecture with local caching
+- 🌄 Support image caching for offline mode
 - 🔐 Secure authentication system
 - 🎨 Using Design system custom
+
+## Page :
+1. Login
+2. Register
+3. Home
+4. Detail Home
+5. Profile
 
 ## Tech Stack
 
